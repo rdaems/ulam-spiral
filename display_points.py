@@ -7,6 +7,7 @@
 from vispy import gloo
 from vispy import app
 import numpy as np
+import vispy.io as io
 
 VERT_SHADER = """
 attribute vec2  a_position;
@@ -23,7 +24,7 @@ void main (void) {
     v_radius = a_size;
     v_linewidth = 1.0;
     v_antialias = 1.0;
-    v_fg_color  = vec4(0.0,0.0,0.0,0.5);
+    v_fg_color  = vec4(0.0,0.0,0.0,0.0);
     v_bg_color  = vec4(a_color,    1.0);
 
     gl_Position = vec4(a_position, 0.0, 1.0);
@@ -76,12 +77,15 @@ class Canvas(app.Canvas):
         gloo.set_state(clear_color='white', blend=True,
                        blend_func=('src_alpha', 'one_minus_src_alpha'))
 
+        img = self.render()
+        io.write_png('render.png', img)
+
         self.show()
 
     def get_vertices(self):
         n = self.prime_numbers.n
-        no_prime_color = (0.99, 0.99, 0.99)
-        prime_color = (0.1, 0.1, 0.1)
+        no_prime_color = (1.0, 1.0, 1.0)
+        prime_color = (0.0, 0.0, 0.0)
         ps = self.pixel_scale
         scale = 0.005
 
@@ -91,7 +95,7 @@ class Canvas(app.Canvas):
         v_color = np.array([prime_color if s else no_prime_color for s in self.prime_numbers.sieve]).astype(np.float32)
 
         # v_size = np.random.uniform(2*ps, 12*ps, (n, 1)).astype(np.float32)
-        v_size = np.ones((n, 1), dtype=np.float32) * 200 * ps * scale
+        v_size = np.ones((n, 1), dtype=np.float32) * 1.5 * ps
         return v_position, v_color, v_size
 
     @staticmethod
